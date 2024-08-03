@@ -22,7 +22,7 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      dispatch(userRegister(userDetail));
+      await dispatch(userRegister(userDetail));
       navigate("/");
     } catch (error) {
       console.log(error);

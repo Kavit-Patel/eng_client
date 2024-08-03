@@ -1,18 +1,30 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RooteState } from "../store/Store";
-import { askForAnswer, askForQuestion } from "../store/gptReducer/gptApi";
+import {
+  askForAnswer,
+  askForQuestion,
+  saveTest,
+} from "../store/gptReducer/gptApi";
 import Loader from "../components/Loader";
 import { setAnsForNext } from "../store/gptReducer/gptSlice";
+import AudioRecord from "../components/AudioRecord";
 
 const Tset = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [arr, setArray] = useState<number[] | null>(null);
   const [val, setVal] = useState<string[] | null>(null);
+  const [audioData, setAudioData] = useState<string>("");
   const [askAgain, setAskAgain] = useState<boolean>(true);
   const { user } = useSelector((state: RooteState) => state.user);
-  const { sentance, sentanceGenerationStatus, ans, answerGenerationStatus } =
-    useSelector((state: RooteState) => state.tset);
+  const {
+    sentance,
+    sentanceGenerationStatus,
+    ans,
+    answerGenerationStatus,
+    lastSavedQuestion,
+    saveTestStatus,
+  } = useSelector((state: RooteState) => state.tset);
   useEffect(() => {
     if (user) {
       if (askAgain) {
@@ -160,43 +172,89 @@ const Tset = () => {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-col gap-3">
+
+      <div className="flex flex-col lg:flex-row gap-3">
+        <div className="w-full flex flex-col gap-3">
+          <button
+            disabled={sentanceGenerationStatus === "pending"}
+            onClick={() => {
+              if (user && val) {
+                dispatch(askForAnswer({ id: user.id, tenses: val, sentance }));
+              }
+            }}
+            className={`w-[50%] self-center px-3 py-1  font-semibold  rounded-md transition-all   ${
+              sentanceGenerationStatus === "pending"
+                ? "bg-gray-300 cursor-wait"
+                : "bg-green-300 hover:bg-green-400 active:scale-95"
+            }`}
+          >
+            {answerGenerationStatus === "pending" ? (
+              <Loader />
+            ) : ans ? (
+              "Answers"
+            ) : (
+              "Get Ans"
+            )}
+          </button>
+          <div className="flex flex-col gap-2 text-lg md:text-xl">
+            {ans &&
+              ans.map((ans, i) => (
+                <span className="" key={i}>
+                  {ans}
+                </span>
+              ))}
+          </div>
+        </div>
+        <div className="w-full flex flex-col gap-3 ">
+          <div className="w-[50%] min-w-fit self-center bg-emerald-100 pb-1 px-6 py-1 rounded-md text-center font-semibold">
+            Record Your Answere
+          </div>
+          <AudioRecord setAudioData={setAudioData} />
+        </div>
+      </div>
+
+      <div className="w-full flex justify-evenly mt-auto mb-2.5 px-2 md:px-10 gap-2 md:gap-24 lg:gap-56">
         <button
-          disabled={sentanceGenerationStatus === "pending"}
+          disabled={
+            saveTestStatus === "pending" || lastSavedQuestion === sentance
+          }
           onClick={() => {
-            if (user && val) {
-              dispatch(askForAnswer({ id: user.id, tenses: val, sentance }));
+            if (user && sentance && val && audioData) {
+              dispatch(
+                saveTest({
+                  id: user.id,
+                  question: sentance,
+                  ans: val,
+                  audio: audioData,
+                })
+              );
             }
           }}
-          className={`min-w-24 self-center px-3 py-1 font-semibold  rounded-md transition-all   ${
-            sentanceGenerationStatus === "pending"
-              ? "bg-gray-300 cursor-wait"
-              : "bg-green-300 hover:bg-green-400 active:scale-95"
+          className={` px-3 md:px-6 py-1 rounded-xl  cursor-pointer text-center text-white font-semibold transition-all  ${
+            saveTestStatus === "pending"
+              ? " bg-gray-300 cursor-wait"
+              : lastSavedQuestion === sentance
+              ? "bg-gray-300 cursor-default"
+              : "bg-cyan-500 hover:bg-cyan-600 active:scale-95"
           }`}
         >
-          {answerGenerationStatus === "pending" ? (
-            <Loader />
-          ) : ans ? (
-            "Answers"
-          ) : (
-            "Get Ans"
-          )}
+          {saveTestStatus === "pending" ? <Loader /> : "SAVE"}
         </button>
-        {ans && (
-          <div className="flex flex-col pl-[5%] sm:pl-[20%] lg:pl-[35%] gap-2 text-lg md:text-xl">
-            {ans.map((ans, i) => (
-              <span className="" key={i}>
-                {ans}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-      <div
-        onClick={() => setAskAgain(true)}
-        className="px-6 py-2 mb-3 rounded-xl min-w-32 bg-violet-400 cursor-pointer mt-auto  self-center text-center text-white font-semibold transition-all hover:bg-violet-600 active:scale-95"
-      >
-        {sentanceGenerationStatus === "pending" ? <Loader /> : "NEXT"}
+        <button
+          disabled={
+            saveTestStatus === "pending" ||
+            sentanceGenerationStatus === "pending"
+          }
+          onClick={() => setAskAgain(true)}
+          className={` px-3 py-1 md:px-6 rounded-xl cursor-pointer text-center text-white font-semibold transition-all  ${
+            saveTestStatus === "pending" ||
+            sentanceGenerationStatus === "pending"
+              ? " bg-gray-300 cursor-wait"
+              : "bg-violet-400 hover:bg-violet-600 active:scale-95"
+          }`}
+        >
+          {sentanceGenerationStatus === "pending" ? <Loader /> : "NEXT"}
+        </button>
       </div>
     </div>
   ) : (

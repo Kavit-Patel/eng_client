@@ -73,3 +73,42 @@ export const askForAnswer = createAsyncThunk(
     }
   }
 );
+
+export const saveTest = createAsyncThunk(
+  "save/test",
+  async (
+    {
+      id,
+      question,
+      ans,
+      audio,
+    }: { id: number; question: string; ans: string[]; audio: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const req = await fetch(
+        `${import.meta.env.VITE_API}/api/saveTest/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ question, ans, audio }),
+        }
+      );
+      const data = await req.json();
+      if (data.success) {
+        toast.success(data.message);
+        return data.response;
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      const errMsg =
+        error instanceof Error
+          ? error.message
+          : " Something went wrong while saving test !";
+      return rejectWithValue(errMsg);
+    }
+  }
+);

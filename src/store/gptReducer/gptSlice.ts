@@ -1,18 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { askForAnswer, askForQuestion } from "./gptApi";
+import { askForAnswer, askForQuestion, saveTest } from "./gptApi";
 
 export interface IinitialState {
   sentance: string;
   ans: string[] | null;
+  lastSavedQuestion: string | null;
   sentanceGenerationStatus: "idle" | "pending" | "success" | "rejected";
   answerGenerationStatus: "idle" | "pending" | "success" | "rejected";
+  saveTestStatus: "idle" | "pending" | "success" | "rejected";
 }
 
 const initialState: IinitialState = {
   sentance: "",
   ans: null,
+  lastSavedQuestion: null,
   sentanceGenerationStatus: "idle",
   answerGenerationStatus: "idle",
+  saveTestStatus: "idle",
 };
 
 const gptSlice = createSlice({
@@ -44,6 +48,16 @@ const gptSlice = createSlice({
       })
       .addCase(askForAnswer.pending, (state) => {
         state.answerGenerationStatus = "pending";
+      })
+      .addCase(saveTest.fulfilled, (state, action) => {
+        state.saveTestStatus = "success";
+        state.lastSavedQuestion = action.payload.sentance;
+      })
+      .addCase(saveTest.rejected, (state) => {
+        state.saveTestStatus = "rejected";
+      })
+      .addCase(saveTest.pending, (state) => {
+        state.saveTestStatus = "pending";
       });
   },
 });
