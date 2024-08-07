@@ -63,7 +63,7 @@ const Tset = () => {
       .sort((a, b) => Object.values(a)[0] - Object.values(b)[0])
       .map((el) => Object.keys(el)[0]);
     setVal(finalArr);
-  }, []);
+  }, [askAgain]);
   return sentance ? (
     <div className="w-full min-h-[calc(100vh-48px)] bg-orange-100 px-2 md:px-44 flex flex-col gap-2">
       <div className="p-2 flex flex-col gap-6">
@@ -173,7 +173,7 @@ const Tset = () => {
         </table>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-3">
+      <div className="flex flex-col-reverse lg:flex-row gap-3">
         <div className="w-full flex flex-col gap-3">
           <button
             disabled={sentanceGenerationStatus === "pending"}
@@ -196,13 +196,15 @@ const Tset = () => {
               "Get Ans"
             )}
           </button>
-          <div className="flex flex-col gap-2 text-lg md:text-xl">
-            {ans &&
-              ans.map((ans, i) => (
-                <span className="" key={i}>
-                  {ans}
-                </span>
-              ))}
+          <div className="flex justify-center">
+            <div className="flex flex-col gap-2 text-lg md:text-xl">
+              {ans &&
+                ans.map((ans, i) => (
+                  <span className="" key={i}>
+                    {ans}
+                  </span>
+                ))}
+            </div>
           </div>
         </div>
         <div className="w-full flex flex-col gap-3 ">
@@ -230,7 +232,7 @@ const Tset = () => {
               );
             }
           }}
-          className={` px-3 md:px-6 py-1 rounded-xl  cursor-pointer text-center text-white font-semibold transition-all  ${
+          className={` px-3 md:px-6 py-1 rounded-xl min-w-24  cursor-pointer text-center text-white font-semibold transition-all  ${
             saveTestStatus === "pending"
               ? " bg-gray-300 cursor-wait"
               : lastSavedQuestion === sentance
@@ -246,7 +248,7 @@ const Tset = () => {
             sentanceGenerationStatus === "pending"
           }
           onClick={() => setAskAgain(true)}
-          className={` px-3 py-1 md:px-6 rounded-xl cursor-pointer text-center text-white font-semibold transition-all  ${
+          className={` px-3 py-1 md:px-6 rounded-xl min-w-24 cursor-pointer text-center text-white font-semibold transition-all  ${
             saveTestStatus === "pending" ||
             sentanceGenerationStatus === "pending"
               ? " bg-gray-300 cursor-wait"
